@@ -5,7 +5,7 @@ import TransactionList from './components/TransactionList';
 import Summary from './components/Summary';
 import Charts from './components/Charts';
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5001');
 
 function App() {
   const [activeTab, setActiveTab] = useState('summary');
@@ -20,18 +20,23 @@ function App() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [summaryFilters, setSummaryFilters] = useState({});
 
   useEffect(() => {
-    loadData();
+    loadData(summaryFilters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadData = async () => {
+  const loadData = async (filters = {}) => {
     try {
       setLoading(true);
+      // Guardar filtros para reutilizarlos después de operaciones CRUD
+      setSummaryFilters(filters);
+
       const [transactionsRes, categoriesRes, summaryRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/api/transactions`),
         axios.get(`${API_BASE_URL}/api/categories`),
-        axios.get(`${API_BASE_URL}/api/summary`)
+        axios.get(`${API_BASE_URL}/api/summary`, { params: filters })
       ]);
 
       setTransactions(transactionsRes.data);
@@ -47,16 +52,16 @@ function App() {
 
   const handleTransactionAdded = (newTransaction) => {
     setTransactions(prev => [newTransaction, ...prev]);
-    loadData(); // Recargar para actualizar el resumen
+    loadData(summaryFilters); // Recargar usando los filtros actuales
   };
 
   const handleTransactionUpdated = () => {
-    loadData(); // Recargar todos los datos
+    loadData(summaryFilters); // Recargar con filtros activos
   };
 
   const handleTransactionDeleted = (id) => {
     setTransactions(prev => prev.filter(t => t.id !== id));
-    loadData(); // Recargar para actualizar el resumen
+    loadData(summaryFilters); // Recargar usando filtros actuales
   };
 
   const formatCurrency = (amount) => {

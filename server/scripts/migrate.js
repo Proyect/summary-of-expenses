@@ -121,13 +121,17 @@ const migrations = {
 
 /**
  * Ejecuta las migraciones
+ * @param {boolean} manageConnection - Si true, esta función administrará connect/close.
+ *        Úsalo en CLI. Cuando se invoca desde el servidor (con conexión activa), pásalo como false.
  */
-async function runMigrations() {
+async function runMigrations(manageConnection = true) {
   try {
     console.log('🚀 Iniciando migraciones de base de datos...');
     
-    // Conectar a la base de datos
-    await dbManager.connect();
+    // Conectar a la base de datos si se gestiona la conexión aquí
+    if (manageConnection) {
+      await dbManager.connect();
+    }
     
     const dbType = dbManager.getDatabaseType();
     const migrationSet = migrations[dbType];
@@ -170,7 +174,9 @@ async function runMigrations() {
     console.error('❌ Error ejecutando migraciones:', error);
     process.exit(1);
   } finally {
-    await dbManager.close();
+    if (manageConnection) {
+      await dbManager.close();
+    }
   }
 }
 
@@ -235,7 +241,7 @@ async function main() {
       break;
     case 'run':
     default:
-      await runMigrations();
+      await runMigrations(true);
       break;
   }
 }

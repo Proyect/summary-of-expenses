@@ -57,7 +57,12 @@ app.use(compression());
 app.use(limiter);
 app.use(morgan(NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(cors({
-  origin: NODE_ENV === 'production' ? false : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: NODE_ENV === 'production' ? false : [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3001'
+  ],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -107,9 +112,9 @@ async function initializeDatabase() {
     await dbManager.connect();
     console.log('✅ Base de datos conectada exitosamente');
     
-    // Ejecutar migraciones si es necesario
+    // Ejecutar migraciones si es necesario sin cerrar la conexión compartida
     const { runMigrations } = require('./scripts/migrate');
-    await runMigrations();
+    await runMigrations(false);
     
     // Inicializar categorías por defecto
     await Category.initializeDefaultCategories();

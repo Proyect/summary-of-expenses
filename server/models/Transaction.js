@@ -152,7 +152,9 @@ class Transaction {
     const { error, value } = this.validate(data);
     if (error) {
       const errorMessage = error.details.map(detail => detail.message).join(', ');
-      throw new Error(errorMessage);
+      const e = new Error(errorMessage);
+      e.name = 'ValidationError';
+      throw e;
     }
 
     try {
@@ -193,7 +195,9 @@ class Transaction {
     const { error, value } = this.validate(data);
     if (error) {
       const errorMessage = error.details.map(detail => detail.message).join(', ');
-      throw new Error(errorMessage);
+      const e = new Error(errorMessage);
+      e.name = 'ValidationError';
+      throw e;
     }
 
     try {
@@ -240,15 +244,13 @@ class Transaction {
    */
   static async delete(id) {
     try {
-      const query = dbManager.getDatabaseType() === 'postgresql'
-        ? 'DELETE FROM transactions WHERE id = $1'
-        : 'DELETE FROM transactions WHERE id = ?';
-      
-      const result = await dbManager.query(query, [id]);
-      
       if (dbManager.getDatabaseType() === 'postgresql') {
-        return result.length > 0 || result.rowCount > 0;
+        const query = 'DELETE FROM transactions WHERE id = $1 RETURNING *';
+        const result = await dbManager.query(query, [id]);
+        return result.length > 0;
       } else {
+        const query = 'DELETE FROM transactions WHERE id = ?';
+        const result = await dbManager.query(query, [id]);
         return result.changes > 0;
       }
     } catch (error) {

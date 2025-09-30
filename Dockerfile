@@ -9,8 +9,8 @@ WORKDIR /app/client
 # Copiar archivos de dependencias del cliente
 COPY client/package*.json ./
 
-# Instalar dependencias
-RUN npm ci --only=production
+# Instalar dependencias (incluye devDependencies para poder compilar)
+RUN npm ci
 
 # Copiar código fuente del cliente
 COPY client/ ./
