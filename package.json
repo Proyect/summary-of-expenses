@@ -1,0 +1,21 @@
+{
+  "name": "home-expense-tracker",
+  "version": "1.0.0",
+  "description": "Sistema de registro de ingresos y egresos del hogar",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build-all": "npm run install-all && npm run build"
+  },
+  "keywords": ["expenses", "income", "home", "tracker"],
+  "author": "Home Expense Tracker",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
